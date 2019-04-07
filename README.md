@@ -12,7 +12,7 @@ Tiny wrapper around `child_process.spawn()` / `exec()` which provides some addit
 * Supports piping
 
 
-```
+```javascript
 var exec = require('@momsfriendlydevco/exec');
 
 exec('echo "Hello world"')

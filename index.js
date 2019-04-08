@@ -125,6 +125,9 @@ module.exports = (cmd, args, options) => {
 					// Log to buffer
 					if (settings[`buffer${suffix}`]) outputBuffer += buf;
 
+					// Trim
+					if (settings.trim) buf = buf.replace(settings.trimRegExp, '')
+
 					// Add prefix + log
 					if (settings[`prefix${suffix}`] && typeof settings[`prefix${suffix}`] == 'function') {
 						buf = settings[`prefix${suffix}`].apply(this, buf);

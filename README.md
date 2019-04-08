@@ -27,6 +27,17 @@ exec(['docker', 'build', '--tag=momsfriendlydevco/test', '.'], {
 ```
 
 
+Debugging
+---------
+This module uses the [Debug NPM package](https://github.com/visionmedia/debug#readme) and responds to `exec`.
+
+To see verbose debugging output simply set `DEBUG=exec` or any valid glob expression.
+
+```
+> DEBUG=exec node someNodeFile.js
+```
+
+
 API
 ===
 This module exposes a single function with returns a promise. The function takes an array (or string) of arguments where the executable is the first item within that array. An additional options object can be passed. 

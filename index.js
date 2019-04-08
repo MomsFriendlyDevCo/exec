@@ -5,6 +5,7 @@
 * @param {Object} [options] Additional options to specify
 * @returns {Promise} A promise which will resolve with the output of the command or reject if the exit code is non-zero
 */
+var debug = require('debug')('exec');
 var fs = require('fs').promises;
 var spawn = require('child_process').spawn;
 var spawnArgs = require('spawn-args');
@@ -78,9 +79,10 @@ module.exports = (cmd, args, options) => {
 					.then(()=> readBuf.toString().split('\n')[0].trim())
 					.then(hashbang => {
 						if (!hashbang.startsWith('#!')) return; // No hashbang
+						debug(`Found hashbang for "${args[0]}" = ${hashbang}`);
 						args = spawnArgs(hashbang.substr(2)).concat(args); // Concat hashbang in front of file
 					})
-					.catch(()=> {}) // Ignore errors and assume the file is a binary
+					.catch(e => debug(`Error when reading ${args[0]} - ${e.toString()}, assuming no hashbang`)) // Ignore errors and assume the file is a binary
 			})
 	// }}}
 
@@ -89,10 +91,12 @@ module.exports = (cmd, args, options) => {
 			// Exec process {{{
 			var ps;
 			if ((settings.pipe == 'auto' && isPiping) || settings.pipe === true) {
+				debug('spawn (as shell)', args);
 				ps = spawn(settings.shell);
 				var pipeCmd = args.join(' ').replace(/\n/g, '\\\\n');
 				ps.stdin.write(pipeCmd, ()=> ps.stdin.end());
 			} else {
+				debug('spawn', args);
 				var mainCmd = args.shift();
 				ps = spawn(mainCmd, args);
 			}

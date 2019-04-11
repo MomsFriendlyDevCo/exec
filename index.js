@@ -11,7 +11,7 @@ var spawn = require('child_process').spawn;
 var spawnArgs = require('spawn-args');
 var isArray = input => typeof input == 'object' && Object.prototype.toString.call(input) == '[object Array]';
 
-module.exports = (cmd, args, options) => {
+var exec = (cmd, args, options) => {
 	var promiseChain = Promise.resolve(); // What we will eventually return
 
 	var isPiping = false;
@@ -34,26 +34,7 @@ module.exports = (cmd, args, options) => {
 	// }}}
 
 	var settings = {
-		buffer: undefined,
-		bufferStdout: false,
-		bufferStderr: false,
-		log: undefined,
-		logStdout: false,
-		logStderr: false,
-		prefix: undefined,
-		prefixStdout: undefined,
-		prefixStderr: undefined,
-		reformat: undefined,
-		reformatStdout: true,
-		reformatStderr: true,
-		trim: true,
-		trimRegExp: /[\n\s]+$/m,
-		hashbang: true,
-		hashbangReadLength: 100,
-		resolveCodes: [0],
-		shell: '/bin/sh',
-		pipe: 'auto',
-		rejectError: 'Non-zero exit code',
+		...exec.defaults,
 		...options,
 	};
 
@@ -62,10 +43,12 @@ module.exports = (cmd, args, options) => {
 	if (settings.log !== undefined) settings.logStdout = settings.logStderr = settings.log;
 	if (settings.prefix !== undefined) settings.prefixStdout = settings.prefixStderr = settings.prefix;
 	if (settings.reformat !== undefined) settings.reformatStdout = settings.reformatStderr = settings.reformat;
+	if (settings.json !== undefined) settings.jsonStdout = settings.jsonStderr = settings.json;
 	if (settings.prefixStdout) settings.logStdout = true;
 	if (settings.prefixStderr) settings.logStderr = true;
 	if (settings.logStdout === true) settings.logStdout = console.log;
 	if (settings.logStderr === true) settings.logStderr = console.log;
+	if ((settings.prefix && settings.json) || (settings.prefixStdout && settings.jsonStdout) || (settings.prefixStderr && settings.jsonStderr)) throw new Error('Prefix AND Json cannot be specified at the same time');
 	// }}}
 
 	// Hashbang detection {{{
@@ -89,16 +72,23 @@ module.exports = (cmd, args, options) => {
 	return promiseChain
 		.then(()=> new Promise((resolve, reject) => {
 			// Exec process {{{
+			var spawnOptions = {
+				env: settings.env,
+				cwd: settings.cwd,
+				uid: settings.uid,
+				gid: settings.gid,
+			};
+
 			var ps;
 			if ((settings.pipe == 'auto' && isPiping) || settings.pipe === true) {
 				debug('spawn (as shell)', args);
-				ps = spawn(settings.shell);
+				ps = spawn(settings.shell, spawnOptions);
 				var pipeCmd = args.join(' ').replace(/\n/g, '\\\\n');
 				ps.stdin.write(pipeCmd, ()=> ps.stdin.end());
 			} else {
 				debug('spawn', args);
 				var mainCmd = args.shift();
-				ps = spawn(mainCmd, args);
+				ps = spawn(mainCmd, args, spawnOptions);
 			}
 			// }}}
 
@@ -134,6 +124,12 @@ module.exports = (cmd, args, options) => {
 						if (buf) settings[`log${suffix}`].call(this, buf);
 					} else if (settings[`prefix${suffix}`]) {
 						settings[`log${suffix}`].call(this, settings[`prefix${suffix}`], buf.toString());
+					} else if (settings[`log${suffix}`] && settings[`json${suffix}`]) { // Return as JSON
+						try {
+							settings[`log${suffix}`].call(this, JSON.parse(buf.toString()));
+						} catch (e) {
+							reject(`Output from ${suffix} is not valid JSON - ${e.toString()}`);
+						}
 					} else if (settings[`log${suffix}`]) {
 						settings[`log${suffix}`].call(this, buf.toString());
 					}
@@ -161,3 +157,35 @@ module.exports = (cmd, args, options) => {
 			});
 		}))
 };
+
+exec.defaults = {
+	buffer: undefined,
+	bufferStdout: false,
+	bufferStderr: false,
+	log: undefined,
+	logStdout: false,
+	logStderr: false,
+	json: undefined,
+	jsonStdout: false,
+	jsonStdErr: false,
+	prefix: undefined,
+	prefixStdout: undefined,
+	prefixStderr: undefined,
+	reformat: undefined,
+	reformatStdout: true,
+	reformatStderr: true,
+	trim: true,
+	trimRegExp: /[\n\s]+$/m,
+	hashbang: true,
+	hashbangReadLength: 100,
+	resolveCodes: [0],
+	shell: '/bin/sh',
+	pipe: 'auto',
+	rejectError: 'Non-zero exit code',
+	env: undefined,
+	cwd: undefined,
+	uid: undefined,
+	gid: undefined,
+};
+
+module.exports = exec;

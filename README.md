@@ -42,6 +42,9 @@ API
 ===
 This module exposes a single function with returns a promise. The function takes an array (or string) of arguments where the executable is the first item within that array. An additional options object can be passed. 
 
+exec([cmd], <cmd+args|args>, [options])
+---------------------------------------
+
 Supported options:
 
 | Option               | Type                      | Default                  | Description                                                                                                                                    |
@@ -66,7 +69,16 @@ Supported options:
 | `hashbangReadLength` | `number`                  | `100`                    | How many bytes to explore at the start of files for the hashbang                                                                               |
 | `trim`               | `boolean`                 | `true`                   | Automatically trim output to remove trailing newlines and spaces                                                                               |
 | `trimRegExp`         | `RegExp`                  | `/[\n\s]+$/m`            | The regular expression used when trimming                                                                                                      |
+| `env`                | `object`                  | `{}`                     | Environment variables to pass to the shell                                                                                                     |
+| `cwd`                | `string`                  | `undeinfed`              | The current working directory to execute the process within                                                                                    |
+| `uid`                | `number`                  | `undefined`              | The UID who owns the process                                                                                                                   |
+| `gid`                | `number`                  | `undefined`              | The GID who owns the process                                                                                                                   |
 
 
 **NOTES:**
 * Setting `log` or `log{Stdout,Stderr}` automatically implies the respective `logStdout` / `logStderr` function to be true
+
+
+exec.defaults
+-------------
+An object containing the default options for `exec()` which can be globally changed.

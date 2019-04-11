@@ -43,12 +43,11 @@ var exec = (cmd, args, options) => {
 	if (settings.log !== undefined) settings.logStdout = settings.logStderr = settings.log;
 	if (settings.prefix !== undefined) settings.prefixStdout = settings.prefixStderr = settings.prefix;
 	if (settings.reformat !== undefined) settings.reformatStdout = settings.reformatStderr = settings.reformat;
-	if (settings.json !== undefined) settings.jsonStdout = settings.jsonStderr = settings.json;
 	if (settings.prefixStdout) settings.logStdout = true;
 	if (settings.prefixStderr) settings.logStderr = true;
 	if (settings.logStdout === true) settings.logStdout = console.log;
 	if (settings.logStderr === true) settings.logStderr = console.log;
-	if ((settings.prefix && settings.json) || (settings.prefixStdout && settings.jsonStdout) || (settings.prefixStderr && settings.jsonStderr)) throw new Error('Prefix AND Json cannot be specified at the same time');
+	if (settings.json && settings.prefixStdout) throw new Error('Json AND prefixStdout (or just prefix) cannot be specified at the same time');
 	// }}}
 
 	// Hashbang detection {{{
@@ -113,7 +112,7 @@ var exec = (cmd, args, options) => {
 					}
 
 					// Log to buffer
-					if (settings[`buffer${suffix}`]) outputBuffer += buf;
+					if (settings[`buffer${suffix}`] || settings[`json${suffix}`]) outputBuffer += buf;
 
 					// Trim
 					if (settings.trim) buf = buf.replace(settings.trimRegExp, '')
@@ -124,12 +123,6 @@ var exec = (cmd, args, options) => {
 						if (buf) settings[`log${suffix}`].call(this, buf);
 					} else if (settings[`prefix${suffix}`]) {
 						settings[`log${suffix}`].call(this, settings[`prefix${suffix}`], buf.toString());
-					} else if (settings[`log${suffix}`] && settings[`json${suffix}`]) { // Return as JSON
-						try {
-							settings[`log${suffix}`].call(this, JSON.parse(buf.toString()));
-						} catch (e) {
-							reject(`Output from ${suffix} is not valid JSON - ${e.toString()}`);
-						}
 					} else if (settings[`log${suffix}`]) {
 						settings[`log${suffix}`].call(this, buf.toString());
 					}
@@ -142,15 +135,21 @@ var exec = (cmd, args, options) => {
 			if (settings.logStderr || settings.prefixStderr || settings.bufferStderr) ps.stderr.on('data', dataFactory('Stderr'));
 			ps.on('close', code => {
 				if (settings.resolveCodes.includes(code)) {
-					resolve(
-						settings.buffer || settings.bufferStdout || settings.bufferStderr
-							? (
-								settings.trim
+					if (settings.json) { // Return as JSON
+						try {
+							resolve(JSON.parse(outputBuffer.toString()));
+						} catch (e) {
+							reject(`Output from ${suffix} is not valid JSON - ${e.toString()}`);
+						}
+					} else if (settings.buffer || settings.bufferStdout || settings.bufferStderr) {
+						resolve(
+							settings.trim
 								? outputBuffer.replace(settings.trimRegExp, '')
 								: outputBuffer
-							)
-							: undefined
-					);
+						)
+					} else {
+						resolve();
+					}
 				} else {
 					return reject(settings.rejectError);
 				}
@@ -165,9 +164,7 @@ exec.defaults = {
 	log: undefined,
 	logStdout: false,
 	logStderr: false,
-	json: undefined,
-	jsonStdout: false,
-	jsonStdErr: false,
+	json: false,
 	prefix: undefined,
 	prefixStdout: undefined,
 	prefixStderr: undefined,

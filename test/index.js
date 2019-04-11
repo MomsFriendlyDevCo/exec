@@ -58,4 +58,9 @@ describe('exec()', ()=> {
 			.then(output => expect(output).to.equal('Hello bar'))
 	)
 
+	it('should return a JSON stream', ()=>
+		exec('echo \'{"foo":"Foo!"}\'', {buffer: true, json: true})
+			.then(output => expect(output).to.be.deep.equal({foo: 'Foo!'}))
+	)
+
 });

@@ -139,7 +139,7 @@ var exec = (cmd, args, options) => {
 						try {
 							resolve(JSON.parse(outputBuffer.toString()));
 						} catch (e) {
-							reject(`Output from ${suffix} is not valid JSON - ${e.toString()}`);
+							reject(`Output is not valid JSON - ${e.toString()}`);
 						}
 					} else if (settings.buffer || settings.bufferStdout || settings.bufferStderr) {
 						resolve(

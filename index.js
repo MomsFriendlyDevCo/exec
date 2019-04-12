@@ -22,9 +22,9 @@ var exec = (cmd, args, options) => {
 	} else if (typeof cmd == 'string') { // cmd<s>, [args], [options] - Split into args
 		isPiping = /(?<!\\)\|/.test(cmd);
 		options = args;
-		args = spawnArgs(cmd, {removequotes: 'always'});
+		args = exec.split(cmd);
 	} else if (typeof cmd == 'string' && typeof args == 'string') { // cmd<s>, args<s>
-		args = spawnArgs(args, {removequotes: 'always'});
+		args = exec.split(args);
 		args.unshift(cmd);
 	} else if (typeof cmd == 'string' && isArray(args)) { // cmd<s>, args<a>, [options] - Given command and args, push CMD onto arg stack and disguard
 		args.unshift(cmd);
@@ -62,7 +62,7 @@ var exec = (cmd, args, options) => {
 					.then(hashbang => {
 						if (!hashbang.startsWith('#!')) return; // No hashbang
 						debug(`Found hashbang for "${args[0]}" = ${hashbang}`);
-						args = spawnArgs(hashbang.substr(2)).concat(args); // Concat hashbang in front of file
+						args = exec.split(hashbang.substr(2)).concat(args); // Concat hashbang in front of file
 					})
 					.catch(e => debug(`Error when reading ${args[0]} - ${e.toString()}, assuming no hashbang`)) // Ignore errors and assume the file is a binary
 			})
@@ -80,12 +80,12 @@ var exec = (cmd, args, options) => {
 
 			var ps;
 			if ((settings.pipe == 'auto' && isPiping) || settings.pipe === true) {
-				debug('spawn (as shell)', args);
+				debug('spawn (as shell)', args, '=>', exec.join(args));
 				ps = spawn(settings.shell, spawnOptions);
 				var pipeCmd = args.join(' ').replace(/\n/g, '\\\\n');
 				ps.stdin.write(pipeCmd, ()=> ps.stdin.end());
 			} else {
-				debug('spawn', args);
+				debug('spawn', args, '=>', exec.join(args));
 				var mainCmd = args.shift();
 				ps = spawn(mainCmd, args, spawnOptions);
 			}
@@ -184,5 +184,16 @@ exec.defaults = {
 	uid: undefined,
 	gid: undefined,
 };
+
+exec.split = cmd => spawnArgs(cmd, {removequotes: 'always'});
+
+exec.join = args => args
+	.map(arg =>
+		/\s/.test(arg) // Has spaces?
+			? `"${arg.replace(/"/g, '\\"')}"` // Enclose in speachmarks escaping inner speachmarks
+			: arg.replace(/^"(.*)"$/, '$1') // Remove wrapping speachmarks (if any)
+	)
+	.map(arg => arg.replace(/\n/g, '\\n'))
+	.join(' ');
 
 module.exports = exec;

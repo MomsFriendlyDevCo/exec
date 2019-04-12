@@ -41,7 +41,7 @@ To see verbose debugging output simply set `DEBUG=exec` or any valid glob expres
 
 API
 ===
-This module exposes a single function with returns a promise. The function takes an array (or string) of arguments where the executable is the first item within that array. An additional options object can be passed. 
+This module exposes a function (which returns a promise) as well as a few utility functions. The function takes an array (or string) of arguments where the executable is the first item within that array. An additional options object can be passed. 
 
 exec([cmd], <cmd+args|args>, [options])
 ---------------------------------------
@@ -84,3 +84,13 @@ Supported options:
 exec.defaults
 -------------
 An object containing the default options for `exec()` which can be globally changed.
+
+
+exec.split(cmd)
+---------------
+Take a command line and split it into a `child_process.spawn()` compatible array.
+
+
+exec.join(args)
+---------------
+Take a disected `child_process.spawn()` comaptible array and convert it into a single line, runnable shell command.

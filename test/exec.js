@@ -38,6 +38,16 @@ describe('exec()', ()=> {
 			.then(res => expect(res).to.equal('1\n2\n3'))
 	)
 
+	it('should handle piped output (from file via pipe)', ()=>
+		exec(`cat ${__dirname}/data/numbers.txt | cat`, {buffer: true})
+			.then(res => expect(res).to.match(/One\nTwo/))
+	)
+
+	it('should handle piped output (from file via rediection)', ()=>
+		exec(`cat < ${__dirname}/data/numbers.txt`, {buffer: true})
+			.then(res => expect(res).to.match(/One\nTwo/))
+	)
+
 	it('should not act on escaped pipes', ()=>
 		exec('echo -n 1\n2\n3\n \| cat', {buffer: true})
 			.then(res => expect(res).to.equal('1\n2\n3'))

@@ -20,7 +20,7 @@ var exec = (cmd, args, options) => {
 		options = args;
 		args = cmd;
 	} else if (typeof cmd == 'string') { // cmd<s>, [args], [options] - Split into args
-		isPiping = /(?<!\\)\|/.test(cmd);
+		isPiping = /(?<!\\)(\||<|>)/.test(cmd);
 		options = args;
 		args = exec.split(cmd);
 	} else if (typeof cmd == 'string' && typeof args == 'string') { // cmd<s>, args<s>

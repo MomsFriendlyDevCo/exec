@@ -1,6 +1,6 @@
 {
   "name": "@momsfriendlydevco/exec",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Wrapper around child_process.spawn() / exec() to execute external commands",
   "main": "index.js",
   "scripts": {
@@ -23,7 +23,8 @@
   "homepage": "https://github.com/MomsFriendlyDevCo/exec#readme",
   "devDependencies": {
     "chai": "^4.2.0",
-    "mocha": "^6.0.2"
+    "mocha": "^6.0.2",
+    "mocha-logger": "^1.0.6"
   },
   "dependencies": {
     "debug": "^4.1.1",

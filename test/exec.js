@@ -1,5 +1,6 @@
 var expect = require('chai').expect;
 var exec = require('..');
+var mlog = require('mocha-logger');
 
 describe('exec()', ()=> {
 
@@ -71,6 +72,15 @@ describe('exec()', ()=> {
 	it('should return a JSON stream', ()=>
 		exec('echo \'{"foo":"Foo!"}\'', {buffer: true, json: true})
 			.then(output => expect(output).to.be.deep.equal({foo: 'Foo!'}))
+	)
+
+	it('should error correctly when asked for JSON but got unparsable', ()=>
+		exec('echo "hello world, this is a really long and invalid string which shouldnt parse to JSON"', {buffer: true, json: true, logStdout: mlog.log})
+			.then(output => expect.fail())
+			.catch(e => {
+				expect(e.toString()).to.match(/^Invalid JSON - /);
+				return Promise.resolve();
+			})
 	)
 
 });

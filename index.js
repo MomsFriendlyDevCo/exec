@@ -136,10 +136,12 @@ var exec = (cmd, args, options) => {
 			ps.on('close', code => {
 				if (settings.resolveCodes.includes(code)) {
 					if (settings.json) { // Return as JSON
+						outputBuffer = outputBuffer.toString();
 						try {
-							resolve(JSON.parse(outputBuffer.toString()));
+							resolve(JSON.parse(outputBuffer));
 						} catch (e) {
-							reject(`Output is not valid JSON - ${e.toString()}`);
+							if (outputBuffer.length > settings.jsonInvalidTruncate) outputBuffer = outputBuffer.substr(0, settings.jsonInvalidTruncate) + settings.jsonInvalidTruncateSuffix;
+							reject(`Invalid JSON - "${outputBuffer}" (${e.toString()})`);
 						}
 					} else if (settings.buffer || settings.bufferStdout || settings.bufferStderr) {
 						resolve(
@@ -165,6 +167,8 @@ exec.defaults = {
 	logStdout: false,
 	logStderr: false,
 	json: false,
+	jsonInvalidTruncate: 30,
+	jsonInvalidTruncateSuffix: '…',
 	prefix: undefined,
 	prefixStdout: undefined,
 	prefixStderr: undefined,

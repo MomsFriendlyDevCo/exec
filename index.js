@@ -70,6 +70,22 @@ var exec = (cmd, args, options) => {
 
 	return promiseChain
 		.then(()=> new Promise((resolve, reject) => {
+			// Apply aliases {{{
+			if ((settings.pipe == 'auto' && isPiping) || settings.pipe === true) { // Apply to piped commands also
+				args = args.reduce((t, arg) => {
+					if (t.pipePrefix) { // Prefixed by a pipe - this is a command
+						if (settings.alias[arg]) arg = settings.alias[arg];
+						t.pipePrefix = false; // Reset pipe command
+					} else if (arg == '|') { // Seen a pipe - next arg is a command
+						t.pipePrefix = true;
+					}
+					t.cmd.push(arg);
+					return t;
+				}, {cmd: [], pipePrefix: true}).cmd;
+			} else if (settings.alias[args[0]]) {
+				args[0] = settings.alias[args[0]];
+			}
+			// }}}
 			// Exec process {{{
 			var spawnOptions = {
 				env: settings.env,
@@ -80,7 +96,7 @@ var exec = (cmd, args, options) => {
 
 			var ps;
 			if ((settings.pipe == 'auto' && isPiping) || settings.pipe === true) {
-				debug('spawn (as shell)', args, '=>', exec.join(args));
+				if (debug.enabled) debug('spawn (as shell)', args, '=>', exec.join(args));
 				ps = spawn(settings.shell, spawnOptions);
 				var pipeCmd = args.join(' ').replace(/\n/g, '\\\\n');
 				ps.stdin.write(pipeCmd, ()=> ps.stdin.end());
@@ -187,6 +203,7 @@ exec.defaults = {
 	cwd: undefined,
 	uid: undefined,
 	gid: undefined,
+	alias: {},
 };
 
 exec.split = cmd => spawnArgs(cmd, {removequotes: 'always'});

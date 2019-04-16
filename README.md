@@ -13,6 +13,7 @@ Tiny wrapper around `child_process.spawn()` / `exec()` which provides some addit
 * Auto-trimming out output
 * Hashbangs supported
 * Can natively accept JSON and fail if not given valid input
+* Support for aliases within commands (and pipes)
 
 
 ```javascript

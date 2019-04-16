@@ -83,4 +83,14 @@ describe('exec()', ()=> {
 			})
 	)
 
+	it('should handle aliased commands', ()=>
+		exec('spew hello spew', {alias: {spew: 'echo'}, buffer: true})
+			.then(output => expect(output).to.deep.equal('hello spew'))
+	)
+
+	it('should handle aliased commands within pipes', ()=>
+		exec('spew foo | meow | cat | meow', {alias: {spew: 'echo', meow: 'cat'}, buffer: true})
+			.then(output => expect(output).to.deep.equal('foo'))
+	)
+
 });

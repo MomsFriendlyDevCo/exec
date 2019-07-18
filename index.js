@@ -168,8 +168,12 @@ var exec = (cmd, args, options) => {
 					} else {
 						resolve();
 					}
-				} else {
+				} else if (typeof settings.rejectError == 'string') {
 					return reject(settings.rejectError);
+				} else if (settings.rejectError === false) {
+					return reject(code);
+				} else if (typeof settings.rejectError == 'function') {
+					return reject(settings.rejectError(code));
 				}
 			});
 		}))

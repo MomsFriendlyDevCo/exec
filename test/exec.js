@@ -93,4 +93,27 @@ describe('exec()', ()=> {
 			.then(output => expect(output).to.deep.equal('foo'))
 	)
 
+	it('should exit correctly', ()=>
+		exec("bash -c 'exit 0'")
+			.catch(()=> expect.fail)
+	)
+
+	it('should exit with an error on invalid commands', ()=>
+		exec("bash -c 'exit 1'")
+			.then(()=> expect.fail)
+			.catch(err => expect(err).to.be.equal(exec.defaults.rejectError))
+	)
+
+	it('should exit with codes when requested', ()=>
+		exec("bash -c 'exit 101'", {rejectError: false})
+			.then(()=> expect.fail)
+			.catch(code => expect(code).to.be.equal(101))
+	)
+
+	it('should exit with custom error handler', ()=>
+		exec("bash -c 'exit 102'", {rejectError: code => `EXIT:${code}`})
+			.then(()=> expect.fail)
+			.catch(err => expect(err).to.be.deep.equal('EXIT:102'))
+	)
+
 });

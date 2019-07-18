@@ -1,6 +1,6 @@
 {
   "name": "@momsfriendlydevco/exec",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Wrapper around child_process.spawn() / exec() to execute external commands",
   "main": "index.js",
   "scripts": {

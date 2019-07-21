@@ -50,6 +50,10 @@ var exec = (cmd, args, options) => {
 	if (settings.json && settings.prefixStdout) throw new Error('Json AND prefixStdout (or just prefix) cannot be specified at the same time');
 	// }}}
 
+	// Apply aliases {{{
+	if (settings.alias[args[0]]) args[0] = settings.alias[args[0]];
+	// }}}
+
 	// Hashbang detection {{{
 	if (settings.hashbang) // Glue hashbang detection + prefixing onto promise chain
 		promiseChain = promiseChain
@@ -70,7 +74,7 @@ var exec = (cmd, args, options) => {
 
 	return promiseChain
 		.then(()=> new Promise((resolve, reject) => {
-			// Apply aliases {{{
+			// Apply aliases (within pipes) {{{
 			if ((settings.pipe == 'auto' && isPiping) || settings.pipe === true) { // Apply to piped commands also
 				args = args.reduce((t, arg) => {
 					if (t.pipePrefix) { // Prefixed by a pipe - this is a command
@@ -82,8 +86,6 @@ var exec = (cmd, args, options) => {
 					t.cmd.push(arg);
 					return t;
 				}, {cmd: [], pipePrefix: true}).cmd;
-			} else if (settings.alias[args[0]]) {
-				args[0] = settings.alias[args[0]];
 			}
 			// }}}
 			// Exec process {{{

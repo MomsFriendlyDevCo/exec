@@ -43,8 +43,8 @@ var exec = (cmd, args, options) => {
 	if (settings.log !== undefined) settings.logStdout = settings.logStderr = settings.log;
 	if (settings.prefix !== undefined) settings.prefixStdout = settings.prefixStderr = settings.prefix;
 	if (settings.reformat !== undefined) settings.reformatStdout = settings.reformatStderr = settings.reformat;
-	if (settings.prefixStdout) settings.logStdout = true;
-	if (settings.prefixStderr) settings.logStderr = true;
+	if (settings.prefixStdout && !settings.logStdout) settings.logStdout = true;
+	if (settings.prefixStderr && !settings.logStderr) settings.logStderr = true;
 	if (settings.logStdout === true) settings.logStdout = console.log;
 	if (settings.logStderr === true) settings.logStderr = console.log;
 	if (settings.json && settings.prefixStdout) throw new Error('Json AND prefixStdout (or just prefix) cannot be specified at the same time');

@@ -101,7 +101,7 @@ describe('exec()', ()=> {
 	it('should exit with an error on invalid commands', ()=>
 		exec("bash -c 'exit 1'")
 			.then(()=> expect.fail)
-			.catch(err => expect(err).to.be.equal(exec.defaults.rejectError))
+			.catch(err => expect(err).to.be.equal('Non-zero exit code: 1'))
 	)
 
 	it('should exit with codes when requested', ()=>

@@ -202,7 +202,7 @@ exec.defaults = {
 	resolveCodes: [0],
 	shell: '/bin/sh',
 	pipe: 'auto',
-	rejectError: 'Non-zero exit code',
+	rejectError: code => `Non-zero exit code: ${code}`,
 	env: undefined,
 	cwd: undefined,
 	uid: undefined,

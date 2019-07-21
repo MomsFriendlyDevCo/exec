@@ -44,6 +44,11 @@ describe('exec()', ()=> {
 			.then(res => expect(res).to.match(/One\nTwo/))
 	)
 
+	it('should handle piped output (from file via pipe and prefix)', ()=>
+		exec(`cat ${__dirname}/data/numbers.txt | cat`, {buffer: true, prefix: '[DATA]', log: ()=> {}})
+			.then(res => expect(res).to.match(/One\nTwo/))
+	)
+
 	it('should handle piped output (from file via rediection)', ()=>
 		exec(`cat < ${__dirname}/data/numbers.txt`, {buffer: true})
 			.then(res => expect(res).to.match(/One\nTwo/))

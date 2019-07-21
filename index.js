@@ -117,8 +117,10 @@ var exec = (cmd, args, options) => {
 					var buf;
 					if (typeof data == 'string') { // Given a string, probably a call from a nested dataFactory entry
 						buf = data;
+						if (settings[`buffer${suffix}`] || settings[`json${suffix}`]) outputBuffer += buf;
 					} else {
 						buf = data.toString();
+						if (settings[`buffer${suffix}`] || settings[`json${suffix}`]) outputBuffer += buf;
 						if ( // Refomat input if we are also using prefixers
 							settings[`prefix${suffix}`] // Using a prefix AND
 							&& settings[`reformat${suffix}`] // We're in reformatting mode AND
@@ -128,9 +130,6 @@ var exec = (cmd, args, options) => {
 							return; // Don't handle anything further as the above should have drained the input buffer
 						}
 					}
-
-					// Log to buffer
-					if (settings[`buffer${suffix}`] || settings[`json${suffix}`]) outputBuffer += buf;
 
 					// Trim
 					if (settings.trim) buf = buf.replace(settings.trimRegExp, '')
@@ -176,6 +175,8 @@ var exec = (cmd, args, options) => {
 					return reject(code);
 				} else if (typeof settings.rejectError == 'function') {
 					return reject(settings.rejectError(code));
+				} else {
+					reject();
 				}
 			});
 		}))

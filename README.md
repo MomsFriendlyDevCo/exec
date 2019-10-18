@@ -78,7 +78,8 @@ Supported options:
 | `cwd`                | `string`                  | `undeinfed`              | The current working directory to execute the process within                                                                                    |
 | `uid`                | `number`                  | `undefined`              | The UID who owns the process                                                                                                                   |
 | `gid`                | `number`                  | `undefined`              | The GID who owns the process                                                                                                                   |
-| `alias`            | `object`                    | `{}`                     | Object list of command aliases
+| `alias`              | `object`                  | `{}`                     | Object list of command aliases                                                                                                                 |
+| `stdin`              | `buffer` or `string`      | `undefined`              | Feed the given input into STDIN of the new process                                                                                             |
 
 
 **NOTES:**

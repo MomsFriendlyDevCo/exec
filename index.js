@@ -179,6 +179,9 @@ var exec = (cmd, args, options) => {
 					reject();
 				}
 			});
+
+			// Feed STDIN content
+			if (settings.stdin) ps.stdin.end(settings.stdin);
 		}))
 };
 
@@ -211,6 +214,7 @@ exec.defaults = {
 	uid: undefined,
 	gid: undefined,
 	alias: {},
+	stdout: undefined,
 };
 
 exec.split = cmd => spawnArgs(cmd, {removequotes: 'always'});

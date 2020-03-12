@@ -96,7 +96,7 @@ var exec = (cmd, args, options) => {
 				uid: settings.uid,
 				gid: settings.gid,
 				...(settings.stdin && (settings.stdin instanceof stream.Readable || settings.stdin == 'inherit')
-					? {stdio: [process.stdin, 'inherit', 'inherit']}
+					? {stdio: [settings.stdin, 'inherit', 'inherit']}
 					: null
 				)
 			};
@@ -153,8 +153,11 @@ var exec = (cmd, args, options) => {
 			};
 			// }}}
 
-			if (settings.logStdout || settings.prefixStdout || settings.bufferStdout) ps.stdout.on('data', dataFactory('Stdout'));
-			if (settings.logStderr || settings.prefixStderr || settings.bufferStderr) ps.stderr.on('data', dataFactory('Stderr'));
+			if (!settings.stdin || settings.stdin !== 'inherit' || settings.stdin instanceof stream.Readable) {
+				if (settings.logStdout || settings.prefixStdout || settings.bufferStdout) ps.stdout.on('data', dataFactory('Stdout'));
+				if (settings.logStderr || settings.prefixStderr || settings.bufferStderr) ps.stderr.on('data', dataFactory('Stderr'));
+			}
+
 			ps.on('close', code => {
 				if (settings.resolveCodes.includes(code)) {
 					if (settings.json) { // Return as JSON

@@ -9,6 +9,7 @@ var debug = require('debug')('exec');
 var fs = require('fs').promises;
 var spawn = require('child_process').spawn;
 var spawnArgs = require('spawn-args');
+var stream = require('stream');
 var isArray = input => typeof input == 'object' && Object.prototype.toString.call(input) == '[object Array]';
 
 var exec = (cmd, args, options) => {
@@ -94,6 +95,10 @@ var exec = (cmd, args, options) => {
 				cwd: settings.cwd,
 				uid: settings.uid,
 				gid: settings.gid,
+				...(settings.stdin && (settings.stdin instanceof stream.Readable || settings.stdin == 'inherit')
+					? {stdio: [process.stdin, 'inherit', 'inherit']}
+					: null
+				)
 			};
 
 			var ps;
@@ -181,7 +186,13 @@ var exec = (cmd, args, options) => {
 			});
 
 			// Feed STDIN content
-			if (settings.stdin) ps.stdin.end(settings.stdin);
+			if (settings.stdin && (settings.stdin instanceof stream.Readable || settings.stdin == 'inherit')) {
+				// Pass
+			} else if (Buffer.isBuffer(settings.stdin) || typeof settings.stdin == 'string') { // Assume all other STDIN values are readable buffers / strings
+				ps.stdin.end(settings.stdin);
+			} else if (settings.stdin) {
+				throw new Error('Unknown settings.stdin type. Can accept Readable streams, strings or buffers');
+			}
 		}))
 };
 
@@ -214,6 +225,7 @@ exec.defaults = {
 	uid: undefined,
 	gid: undefined,
 	alias: {},
+	stdin: undefined,
 	stdout: undefined,
 };
 

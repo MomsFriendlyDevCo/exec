@@ -79,11 +79,12 @@ Supported options:
 | `uid`                | `number`                  | `undefined`              | The UID who owns the process                                                                                                                   |
 | `gid`                | `number`                  | `undefined`              | The GID who owns the process                                                                                                                   |
 | `alias`              | `object`                  | `{}`                     | Object list of command aliases                                                                                                                 |
-| `stdin`              | `buffer` or `string`      | `undefined`              | Feed the given input into STDIN of the new process                                                                                             |
+| `stdin`              | `stream.Readable`, `"inherit"`, `buffer` or `string` | `undefined`              | Either connect the stream to the proess STDIN or feed the given input into STDIN if its a string or buffer |
 
 
 **NOTES:**
 * Setting `log` or `log{Stdout,Stderr}` automatically implies the respective `logStdout` / `logStderr` function to be true
+* Setting `stdin="inherit"` is the equivelent of setting `stdin=process.stdin` to connect the outer process STDIN pipe to the innner process
 
 
 exec.defaults

@@ -121,9 +121,4 @@ describe('exec()', ()=> {
 			.catch(err => expect(err).to.be.deep.equal('EXIT:102'))
 	)
 
-	it('should support custom STDIN input', ()=>
-		exec('cat', {stdin: Buffer.from('Hello world'), buffer: true})
-			.then(output => expect(output).to.be.deep.equal('Hello world'))
-	);
-
 });

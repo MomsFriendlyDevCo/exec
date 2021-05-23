@@ -125,7 +125,6 @@ var exec = (cmd, args, options) => {
 						if (settings[`buffer${suffix}`] || settings[`json${suffix}`]) outputBuffer += buf;
 					} else {
 						buf = data.toString();
-						if (settings[`buffer${suffix}`] || settings[`json${suffix}`]) outputBuffer += buf;
 						if ( // Refomat input if we are also using prefixers
 							settings[`prefix${suffix}`] // Using a prefix AND
 							&& settings[`reformat${suffix}`] // We're in reformatting mode AND
@@ -134,16 +133,17 @@ var exec = (cmd, args, options) => {
 							buf.split(/\s*\n\s*/).forEach(line => eventHandler(line)); // Call this event handler with each line
 							return; // Don't handle anything further as the above should have drained the input buffer
 						}
+						if (settings[`buffer${suffix}`] || settings[`json${suffix}`]) outputBuffer += buf;
 					}
 
 					// Trim
 					if (settings.trim) buf = buf.replace(settings.trimRegExp, '')
 
 					// Add prefix + log
-					if (settings[`prefix${suffix}`] && typeof settings[`prefix${suffix}`] == 'function') {
+					if (settings[`prefix${suffix}`] && settings[`log${suffix}`] && typeof settings[`prefix${suffix}`] == 'function') {
 						buf = settings[`prefix${suffix}`].apply(this, buf);
 						if (buf) settings[`log${suffix}`].call(this, buf);
-					} else if (settings[`prefix${suffix}`]) {
+					} else if (settings[`prefix${suffix}`] && settings[`log${suffix}`]) {
 						settings[`log${suffix}`].call(this, settings[`prefix${suffix}`], buf.toString());
 					} else if (settings[`log${suffix}`]) {
 						settings[`log${suffix}`].call(this, buf.toString());

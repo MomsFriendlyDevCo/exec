@@ -40,6 +40,7 @@ var exec = (cmd, args, options) => {
 	};
 
 	// Settings mangling {{{
+	if (settings.json) settings.bufferStdout = true;
 	if (settings.buffer !== undefined) settings.bufferStdout = settings.bufferStderr = settings.buffer;
 	if (settings.log !== undefined) settings.logStdout = settings.logStderr = settings.log;
 	if (settings.prefix !== undefined) settings.prefixStdout = settings.prefixStderr = settings.prefix;

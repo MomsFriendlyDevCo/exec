@@ -79,6 +79,11 @@ describe('exec()', ()=> {
 			.then(output => expect(output).to.be.deep.equal({foo: 'Foo!'}))
 	)
 
+	it('should return a JSON stream (buffering implied)', ()=>
+		exec('echo \'{"foo":"Foo!"}\'', {json: true})
+			.then(output => expect(output).to.be.deep.equal({foo: 'Foo!'}))
+	)
+
 	it('should error correctly when asked for JSON but got unparsable', ()=>
 		exec('echo "hello world, this is a really long and invalid string which shouldnt parse to JSON"', {buffer: true, json: true, logStdout: mlog.log})
 			.then(output => expect.fail())

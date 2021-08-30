@@ -63,7 +63,9 @@ var exec = (cmd, args, options) => {
 				var fh;
 				var readBuf = Buffer.alloc(settings.hashbangReadLength);
 				return fs.open(args[0], 'r')
-					.then(fd => fd.read(readBuf, 0, settings.hashbangReadLength, 0).then(()=> fd.close))
+					.then(fd => fd.read(readBuf, 0, settings.hashbangReadLength, 0)
+						.then(()=> fd.close())
+					)
 					.then(()=> readBuf.toString().split(/\r?\n/, 2)[0].trim())
 					.then(hashbang => {
 						if (!hashbang.startsWith('#!')) return; // No hashbang

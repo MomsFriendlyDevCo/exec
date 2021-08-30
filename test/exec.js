@@ -46,7 +46,7 @@ describe('exec()', ()=> {
 
 	it('should handle piped output (from file via pipe and prefix)', ()=>
 		exec(`cat ${__dirname}/data/numbers.txt | cat`, {buffer: true, prefix: '[DATA]', log: ()=> {}})
-			.then(res => expect(res).to.match(/One\nTwo/))
+			.then(res => expect(res).to.match(/^One\nTwo/))
 	)
 
 	it('should handle piped output (from file via rediection)', ()=>
@@ -65,8 +65,13 @@ describe('exec()', ()=> {
 	)
 
 	it('should run a file via a hashbang (via array method)', ()=>
-		exec([`${__dirname}/data/hashbang.js`, 'foo'], {buffer: true})
+		exec([`${__dirname}/data/hashbang.js`, 'foo'], {buffer: true, trim: true})
 			.then(output => expect(output).to.equal('Hello foo'))
+	)
+
+	it('should run a file via a hashbang (via array method, no trim)', ()=>
+		exec([`${__dirname}/data/hashbang.js`, 'foo'], {buffer: true, trim: false})
+			.then(output => expect(output).to.equal('Hello foo\n'))
 	)
 
 	it('should run a file via a hashbang (via string method)', ()=>

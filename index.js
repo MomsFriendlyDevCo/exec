@@ -49,7 +49,7 @@ var exec = (cmd, args, options) => {
 	if ((options?.log || options?.logStderr) && settings.prefixStderr && !settings.logStderr) settings.logStderr = true;
 	if (settings.logStdout === true) settings.logStdout = console.log;
 	if (settings.logStderr === true) settings.logStderr = console.log;
-	if (settings.json && settings.prefixStdout) throw new Error('Json AND prefixStdout (or just prefix) cannot be specified at the same time');
+	if (settings.json && settings.prefixStdout) throw new Error('json AND prefixStdout (or just prefix) cannot be specified at the same time');
 	// }}}
 
 	// Apply aliases {{{
@@ -64,7 +64,7 @@ var exec = (cmd, args, options) => {
 				var readBuf = Buffer.alloc(settings.hashbangReadLength);
 				return fs.open(args[0], 'r')
 					.then(fd => fd.read(readBuf, 0, settings.hashbangReadLength, 0).then(()=> fd.close))
-					.then(()=> readBuf.toString().split('\n')[0].trim())
+					.then(()=> readBuf.toString().split(/\r?\n/, 2)[0].trim())
 					.then(hashbang => {
 						if (!hashbang.startsWith('#!')) return; // No hashbang
 						debug(`Found hashbang for "${args[0]}" = ${hashbang}`);
@@ -123,22 +123,22 @@ var exec = (cmd, args, options) => {
 					var buf;
 					if (typeof data == 'string') { // Given a string, probably a call from a nested dataFactory entry
 						buf = data;
-						if (settings[`buffer${suffix}`] || settings[`json${suffix}`]) outputBuffer += buf;
+						if (settings[`buffer${suffix}`] || settings[`json${suffix}`]) outputBuffer += buf + '\n';
 					} else {
 						buf = data.toString();
-						if ( // Refomat input if we are also using prefixers
+						if ( // Reformat input if we are also using prefixers
 							settings[`prefix${suffix}`] // Using a prefix AND
 							&& settings[`reformat${suffix}`] // We're in reformatting mode AND
-							&& /\n/.test(buf) // The input contains new lines
+							&& /\r?\n/.test(buf) // The input contains new lines
 						) {
-							buf.split(/\s*\n\s*/).forEach(line => eventHandler(line)); // Call this event handler with each line
+							buf.split(/\s*\r?\n\s*/).forEach(line => eventHandler(line)); // Call this event handler with each line
 							return; // Don't handle anything further as the above should have drained the input buffer
 						}
 						if (settings[`buffer${suffix}`] || settings[`json${suffix}`]) outputBuffer += buf;
 					}
 
 					// Trim
-					if (settings.trim) buf = buf.replace(settings.trimRegExp, '')
+					if (settings.trim) buf = buf.replace(settings.trimRegExp, '\n')
 
 					// Add prefix + log
 					if (settings[`prefix${suffix}`] && settings[`log${suffix}`] && typeof settings[`prefix${suffix}`] == 'function') {
@@ -172,7 +172,7 @@ var exec = (cmd, args, options) => {
 					} else if (settings.buffer || settings.bufferStdout || settings.bufferStderr) {
 						resolve(
 							settings.trim
-								? outputBuffer.replace(settings.trimRegExp, '')
+								? outputBuffer.replace(/\r?\n$/, '')
 								: outputBuffer
 						)
 					} else {
@@ -217,7 +217,7 @@ exec.defaults = {
 	reformatStdout: true,
 	reformatStderr: true,
 	trim: true,
-	trimRegExp: /[\n\s]+$/m,
+	trimRegExp: /[\s*\r?\n\s*]+$/m,
 	hashbang: true,
 	hashbangReadLength: 100,
 	resolveCodes: [0],

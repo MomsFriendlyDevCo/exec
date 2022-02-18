@@ -62,17 +62,19 @@ var exec = (cmd, args, options) => {
 			.then(()=> { // Read first line into buffer and close
 				var fh;
 				var readBuf = Buffer.alloc(settings.hashbangReadLength);
+				debug(`Opening "${args[0]}" for reading to detect hashbang`);
 				return fs.open(args[0], 'r')
 					.then(fd => fd.read(readBuf, 0, settings.hashbangReadLength, 0)
 						.then(()=> fd.close())
 					)
 					.then(()=> readBuf.toString().split(/\r?\n/, 2)[0].trim())
 					.then(hashbang => {
+						debug('Looking for hashbang in "${hashbang}"');
 						if (!hashbang.startsWith('#!')) return; // No hashbang
 						debug(`Found hashbang for "${args[0]}" = ${hashbang}`);
 						args = exec.split(hashbang.substr(2)).concat(args); // Concat hashbang in front of file
 					})
-					.catch(e => debug(`Error when reading ${args[0]} - ${e.toString()}, assuming no hashbang`)) // Ignore errors and assume the file is a binary
+					.catch(e => debug(`Warning: Error when reading ${args[0]} - ${e.toString()}, assuming no hashbang`)) // Ignore errors and assume the file is a binary
 			})
 	// }}}
 

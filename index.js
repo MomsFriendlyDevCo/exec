@@ -140,7 +140,7 @@ var exec = (cmd, args, options) => {
 					}
 
 					// Trim
-					if (settings.trim) buf = buf.replace(settings.trimRegExp, '\n')
+					if (settings.trim) buf = buf.replace(settings.trimRegExp, '')
 
 					// Add prefix + log
 					if (settings[`prefix${suffix}`] && settings[`log${suffix}`] && typeof settings[`prefix${suffix}`] == 'function') {
@@ -219,7 +219,7 @@ exec.defaults = {
 	reformatStdout: true,
 	reformatStderr: true,
 	trim: true,
-	trimRegExp: /[\s*\r?\n\s*]+$/m,
+	trimRegExp: /[\s*(\r?\n)+\s*]$/sm,
 	hashbang: true,
 	hashbangReadLength: 100,
 	resolveCodes: [0],
